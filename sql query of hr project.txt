@@ -1,0 +1,127 @@
+SELECT * FROM hr_database.hr;
+ 
+ update hr
+set hire_date = case
+ when hire_date like '%/%' then str_to_date(hire_date,'%m/%d/%Y')
+ when hire_date like '%-%' then str_to_date(hire_date,'%m-%d-%Y')
+ else null
+ end;
+ 
+alter table hr
+modify column birthdate date,
+modify column hire_date date;
+
+describe hr;
+
+alter table hr
+drop column new_termdate;
+
+update hr
+set termdate = case
+when termdate = '0000-00-00' then null
+else termdate 
+end;
+
+alter table hr
+modify column termdate date ;
+ 
+ alter table hr
+ add column age int;
+ 
+ update hr
+ set age = timestampdiff(year,birthdate,curdate());
+ 
+ select min(age) as youngest,
+ max(age) as oldest
+from hr;
+
+select count(*)
+from hr
+where age < 18;
+
+--  1. what is the gender breakdown of employees in the company  
+
+select gender,count(*) as count 
+from hr
+where termdate is null
+group by gender;
+
+-- 2. what is the race breakdown of the employee in the company?
+
+select race,count(*) as count 
+from hr 
+where termdate is null 
+group by race
+order by count desc;
+
+-- 3. what is the age distribution of employee in the company?
+
+select case
+when age between 18 and 24 then '18-24'
+when age between 25 and 34 then '25-34'
+when age between 35 and 44 then '35-44'
+when age between 45 and 54 then '45-54'
+when age between 55 and 64 then '55-64'
+else '65+'
+end as age_group,gender,
+count(*) as count 
+from hr 
+where termdate is null
+group by age_group,gender
+order by age_group ;
+
+-- 4. how many employee work at headquarter versus remote location?
+
+select location, count(*)
+from hr 
+where termdate is  null
+group by location;
+
+-- 5. what is the average length of employement for employee who have been terminated
+
+select round(avg(datediff(termdate,hire_date)/365),0)  as avg_length_employment
+from hr 
+where termdate is not null and termdate <= curdate();
+
+-- 6. how gender distribution vary across department
+
+select department,gender,count(*) as gender_count
+from hr
+where termdate is null
+group by department, gender
+order by department;
+
+-- 7. distribution of job title across company
+select jobtitle,count(*) as count
+from hr
+where termdate is null
+group by jobtitle
+order by jobtitle;
+
+-- 8. which department has heighest turnover rate ;
+
+select department,total_count,term_count,term_count/total_count as term_rate
+from (select department,
+count(*) as total_count,
+sum(case when termdate is not null and termdate <= curdate() then 1 else 0 end) as term_count
+ from hr
+ group by department) as subquery 
+ order by term_rate desc;
+ 
+ -- 9. what is the distribution of employee across location by state?
+ 
+ select location_state,count(*) as no_of_employee
+ from hr
+ where termdate is null
+ group by location_state
+ order by no_of_employee desc;
+ 
+ -- 10. how has the company's employee count changed over time based on hire and term date
+ 
+ select year,hire,termination,hire-termination as net_change,round(((hire-termination)/hire),2)*100 as net_change_per
+ from(select YEAR(hire_date) as year,count(*) as hire ,
+ sum(case when termdate is not null and termdate <= curdate() then 1 else 0 end) as termination
+ from hr
+ group by YEAR(hire_date) ) as subquery
+ order by year ;
+ 
