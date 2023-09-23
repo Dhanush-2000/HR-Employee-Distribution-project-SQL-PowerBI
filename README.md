@@ -1,5 +1,6 @@
 # HR-Employee-Distribution-project-SQL-PowerBI
 ![image](https://github.com/Dhanush-2000/HR-Employee-Distribution-project-SQL-PowerBI/assets/145687965/dbc369d4-27cc-4deb-9286-7dcda979cfc5)
+![Screenshot 2023-09-23 113134](https://github.com/Dhanush-2000/HR-Employee-Distribution-project-SQL-PowerBI/assets/145687965/42fe9693-7fa7-421b-a6da-92fe0ec10bcc)
 
 Data Used
 Data - HR Data with over 22000 rows from the year 2000 to 2020.
